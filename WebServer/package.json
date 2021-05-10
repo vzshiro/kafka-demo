@@ -1,0 +1,17 @@
+{
+  "name": "kafka",
+  "version": "1.0.0",
+  "description": "Refer to the link below (Image used CentOS 7.8.2003 - centos-release-7-8.2003.0.el7.centos.x86_64)\r https://docs.confluent.io/platform/current/quickstart/ce-docker-quickstart.html",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1",
+    "kafkajs": "^1.15.0",
+    "ws": "^7.4.5"
+  }
+}
