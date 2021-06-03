@@ -26,20 +26,78 @@
           KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
           KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:29092,PLAINTEXT_HOST://localhost:9092
           KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
-          KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+          KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
           KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-          KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 1
-          KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR: 1
+          KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 3
+          KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR: 3
           KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-          KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+          KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
           KAFKA_JMX_PORT: 9101
           KAFKA_JMX_HOSTNAME: localhost
           KAFKA_CONFLUENT_SCHEMA_REGISTRY_URL: http://schema-registry:8081
           CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: broker:29092
-          CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
+          CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 3
           CONFLUENT_METRICS_ENABLE: 'true'
           CONFLUENT_SUPPORT_CUSTOMER_ID: 'anonymous'
     
+      broker2:
+        image: confluentinc/cp-server:6.1.1
+        hostname: broker2
+        container_name: broker2
+        depends_on:
+          - zookeeper
+        ports:
+          - "19092:19092"
+          - "19101:19101"
+        environment:
+          KAFKA_BROKER_ID: 2
+          KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+          KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+          KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker2:29092,PLAINTEXT_HOST://localhost:19092
+          KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
+          KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+          KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+          KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 3
+          KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR: 3
+          KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+          KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+          KAFKA_JMX_PORT: 9101
+          KAFKA_JMX_HOSTNAME: localhost
+          KAFKA_CONFLUENT_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+          CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: broker2:29092
+          CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 3
+          CONFLUENT_METRICS_ENABLE: 'true'
+          CONFLUENT_SUPPORT_CUSTOMER_ID: 'anonymous'
+      
+      broker3:
+        image: confluentinc/cp-server:6.1.1
+        hostname: broker3
+        container_name: broker3
+        depends_on:
+          - zookeeper
+        ports:
+          - "39092:39092"
+          - "39101:39101"
+        environment:
+          KAFKA_BROKER_ID: 3
+          KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+          KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+          KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker3:29092,PLAINTEXT_HOST://localhost:39092
+          KAFKA_METRIC_REPORTERS: io.confluent.metrics.reporter.ConfluentMetricsReporter
+          KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+          KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+          KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR: 3
+          KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR: 3
+          KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+          KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+          KAFKA_JMX_PORT: 9101
+          KAFKA_JMX_HOSTNAME: localhost
+          KAFKA_CONFLUENT_SCHEMA_REGISTRY_URL: http://schema-registry:8081
+          CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: broker3:29092
+          CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 3
+          CONFLUENT_METRICS_ENABLE: 'true'
+          CONFLUENT_SUPPORT_CUSTOMER_ID: 'anonymous'
+
       schema-registry:
         image: confluentinc/cp-schema-registry:6.1.1
         hostname: schema-registry
@@ -177,19 +235,19 @@
           KAFKA_REST_LISTENERS: "http://0.0.0.0:8082"
           KAFKA_REST_SCHEMA_REGISTRY_URL: 'http://schema-registry:8081'
           
-      web-server:
-        build:
-          context: ./WebServer
-          dockerfile: Dockerfile
-        image: web-server
-        restart: always
-        depends_on:
-          - broker
-          - schema-registry
-        ports:
-          - "3000:3000"
-        hostname: web-server
-        container_name: web-server
-        environment:
-          BROKER: 'broker:29092'
-          PORT: 3000
+      # web-server:
+      #   build:
+      #     context: ./WebServer
+      #     dockerfile: Dockerfile
+      #   image: web-server
+      #   restart: always
+      #   depends_on:
+      #     - broker
+      #     - schema-registry
+      #   ports:
+      #     - "3000:3000"
+      #   hostname: web-server
+      #   container_name: web-server
+      #   environment:
+      #     BROKER: 'broker:29092'
+      #     PORT: 3000

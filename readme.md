@@ -33,11 +33,12 @@ docker-compose exec ksqldb-cli ksql http://ksqldb-server:8088
 
 1. Go into WebServer directory `cd WebServer`
 2. Install dependencies using `npm install`
-3. Start the producer/consumer using `npm run start`
+3. Start the producer/consumer using `npm start`
 4. Go to http://localhost:3000
 
 ## Setup Entire Docker Compose Stack
 
-1. To Start `sudo /usr/local/bin/docker-compose up --build -d`
-1. To Check `sudo /usr/local/bin/docker-compose ps`
-2. To Stop `sudo /usr/local/bin/docker-compose down`
+_Optional - Create Symbolic Link to docker-compose_
+1. To Start `docker-compose up --build -d`
+2. To Check `docker-compose ps`
+3. To Stop `docker-compose down`
