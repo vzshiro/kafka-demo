@@ -235,19 +235,87 @@
           KAFKA_REST_LISTENERS: "http://0.0.0.0:8082"
           KAFKA_REST_SCHEMA_REGISTRY_URL: 'http://schema-registry:8081'
           
-      # web-server:
-      #   build:
-      #     context: ./WebServer
-      #     dockerfile: Dockerfile
-      #   image: web-server
-      #   restart: always
-      #   depends_on:
-      #     - broker
-      #     - schema-registry
-      #   ports:
-      #     - "3000:3000"
-      #   hostname: web-server
-      #   container_name: web-server
-      #   environment:
-      #     BROKER: 'broker:29092'
-      #     PORT: 3000
+      web-server:
+        build:
+          context: ./WebServer
+          dockerfile: Dockerfile
+        image: web-server
+        restart: always
+        depends_on:
+          - broker
+          - schema-registry
+        ports:
+          - "3000:3000"
+        hostname: web-server
+        container_name: web-server
+        environment:
+          BROKERS: 'broker:29092'
+          PORT: 3000
+      
+      web-server2:
+        build:
+          context: ./WebServer
+          dockerfile: Dockerfile
+        image: web-server
+        restart: always
+        depends_on:
+          - broker
+          - schema-registry
+        ports:
+          - "3001:3001"
+        hostname: web-server2
+        container_name: web-server2
+        environment:
+          BROKERS: 'broker:29092'
+          PORT: 3001
+      
+      web-server3:
+        build:
+          context: ./WebServer
+          dockerfile: Dockerfile
+        image: web-server
+        restart: always
+        depends_on:
+          - broker
+          - schema-registry
+        ports:
+          - "3002:3002"
+        hostname: web-server3
+        container_name: web-server3
+        environment:
+          BROKERS: 'broker:29092'
+          PORT: 3002
+      
+      web-server4:
+        build:
+          context: ./WebServer
+          dockerfile: Dockerfile
+        image: web-server
+        restart: always
+        depends_on:
+          - broker
+          - schema-registry
+        ports:
+          - "3003:3003"
+        hostname: web-server4
+        container_name: web-server4
+        environment:
+          BROKERS: 'broker:29092'
+          PORT: 3003
+      
+      web-server5:
+        build:
+          context: ./WebServer
+          dockerfile: Dockerfile
+        image: web-server
+        restart: always
+        depends_on:
+          - broker
+          - schema-registry
+        ports:
+          - "3004:3004"
+        hostname: web-server5
+        container_name: web-server5
+        environment:
+          BROKERS: 'broker:29092'
+          PORT: 3004
