@@ -35,13 +35,18 @@ async function produceMessage(data, ws, cacheMsg) {
     case "compress":
       ws.compress = true;
       return;
+    case "multiply":
+      ws.multiply = data.value;
+      return;
   }
   
-  var message = { value: data.message, partition: data.key%topics[data.topic] };
+  var message = { value: data.message };
   var messages = cacheMsg || [message]
-  if (!cacheMsg && data.multiply) {
-    messages = new Array(data.multiply);
-    for (let i=0; i<data.multiply; ++i) messages[i] = message;
+  if (ws.multiply) {
+    if (!cacheMsg || cacheMsg.length != ws.multiply) {
+      messages = new Array(ws.multiply);
+      for (let i=0; i<ws.multiply; ++i) messages[i] = message;
+    }
   }
   await producer.send({
     topic: data.topic,
@@ -176,6 +181,18 @@ function resetMetrics(ws) {
   ws.lastMessage = {};
 }
 
+function recreateTopics() {
+  admin.deleteTopics({
+    topics: Object.keys(topics),
+    timeout: 5000,
+  }).then(() => {
+    return true;
+  }).catch((err) => {
+    console.log("Error recreating topic", err)
+    return false;
+  })
+}
+
 function initWebSocket(ws) {
   ws.id = wsServer.getUniqueID();
   resetMetrics(ws);
@@ -217,6 +234,9 @@ wsServer.on('connection', (ws, req) => {
       case "resetMetrics":
         resetMetrics(ws);
         break;
+      case "recreateTopics":
+        recreateTopics(ws);
+        break;
       default:
         if (data.repeatMsg) {
           ws.repeat = true;
@@ -226,6 +246,7 @@ wsServer.on('connection', (ws, req) => {
           ws.compress = true;
           data.compress = false;
         }
+        ws.multiply = data.multiply;
         produceMessage(data, ws);
         break;
     }
