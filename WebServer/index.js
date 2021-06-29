@@ -63,7 +63,7 @@ async function produceMessage(data, ws, cacheMsg) {
 }
 
 // const consumer = kafka.consumer({ groupId: 'test-group' })
-async function initConsumer() {
+async function createTopics() {
   await admin.createTopics({
     validateOnly: false,
     waitForLeaders: true,
@@ -190,6 +190,8 @@ function recreateTopics() {
   }).catch((err) => {
     console.log("Error recreating topic", err)
     return false;
+  }).finally(() => {
+    createTopics();
   })
 }
 
@@ -199,7 +201,7 @@ function initWebSocket(ws) {
 }
 
 initProducer();
-initConsumer();
+createTopics();
 
 let connectedClients = [];
 
