@@ -64,6 +64,7 @@ async function produceMessage(data, ws, cacheMsg) {
 
 // const consumer = kafka.consumer({ groupId: 'test-group' })
 async function createTopics() {
+  console.log(generateTopicConfig())
   await admin.createTopics({
     validateOnly: false,
     waitForLeaders: true,
@@ -107,6 +108,7 @@ async function createConsumer(ws, fromBeginning, groupId) {
       // Remove consumer if not connected
       if (ws.readyState === ws.OPEN) {
         ws.msgProcessed++;
+        ws.consumePerSec++;
         ws.lastMessage = data;
       } else {
         consumer.disconnect();
@@ -134,20 +136,6 @@ function generateTopicConfig() {
   }, [])
 }
 
-function processMessage({ topic, partition, message }) {
-  var currentTime = new Date();
-  var data = {
-    topic: topic,
-    partition: partition,
-    consumer: "Default",
-    value: message.value.toString(),
-    timestamp: new Date(+message.timestamp),
-    processDelay: (currentTime.getTime() - new Date(+message.timestamp).getTime()) / 1000 + ' sec'
-  }
-  // console.log(data);
-  sendMessageToClients(data);
-}
-
 function processedMessage(ws) {
   if (ws.readyState === ws.OPEN) {
     var data = {
@@ -155,6 +143,7 @@ function processedMessage(ws) {
       msgSent: ws.msgSent,
       msgPerSec: ws.msgPerSec,
       msgProcessed: ws.msgProcessed,
+      consumePerSec: ws.consumePerSec,
       // lag: ws.msgSent - ws.msgProcessed, // Inaccurate
       lastMessage: ws.lastMessage
     }
@@ -171,6 +160,7 @@ function publishMetrics(ws) {
       clearInterval(interval);
     }
     ws.msgPerSec = 0;
+    ws.consumePerSec = 0;
   }, 1000)
 }
 
@@ -178,6 +168,7 @@ function resetMetrics(ws) {
   ws.msgSent = 0;
   ws.msgPerSec = 0;
   ws.msgProcessed = 0;
+  ws.consumePerSec = 0;
   ws.lastMessage = {};
 }
 
@@ -185,13 +176,20 @@ function recreateTopics() {
   admin.deleteTopics({
     topics: Object.keys(topics),
     timeout: 5000,
-  }).then(() => {
+  }).then((res) => {
+    console.log(res)
     return true;
   }).catch((err) => {
     console.log("Error recreating topic", err)
     return false;
   }).finally(() => {
     createTopics();
+  })
+}
+
+function getTopicsMetadata(ws) {
+  admin.fetchTopicMetadata({ topics: Object.keys(topics) }).then((data) => {
+    ws.send(JSON.stringify({ metadata: true, data: data }));
   })
 }
 
@@ -238,6 +236,9 @@ wsServer.on('connection', (ws, req) => {
         break;
       case "recreateTopics":
         recreateTopics(ws);
+        break;
+      case "getTopicsMetadata":
+        getTopicsMetadata(ws);
         break;
       default:
         if (data.repeatMsg) {

@@ -153,10 +153,12 @@
                     $("#topic-list").append(`<a class="dropdown-item" onclick="changeTopic(this)" href="#">${topic}</a>`)
                 })
                 $("#topic-name").html(data.topics[0])
+            } else if (data.metadata) {
+                console.log(data);
             } else {
                 msgReceived++;
                 if (data.metrics) {
-                    msgDisplay.insertAdjacentHTML("afterbegin", `<p><b>Messages Sent</b>: ${data.msgSent}, <b>Messages Processed</b>: ${data.msgProcessed}</p>`);
+                    msgDisplay.insertAdjacentHTML("afterbegin", `<p><b>Messages Sent</b>: ${data.msgSent}, <b>Messages Processed</b>: ${data.msgProcessed} (${data.consumePerSec} / sec)</p>`);
                     msgPerSec.innerHTML = `${data.msgPerSec} msg/sec`
                     data = data.lastMessage;
                 }
@@ -208,6 +210,11 @@
         }
         function socketReady() {
             return ws.readyState == ws.OPEN;
+        }
+        function getTopicsMetadata() {
+            if (socketReady()) {
+                ws.send(JSON.stringify({ action: "getTopicsMetadata" }))
+            }
         }
         function clearMsg() {
             msgDisplay.innerHTML = "";
