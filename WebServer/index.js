@@ -1,10 +1,10 @@
-const { Kafka } = require('kafkajs')
+const { CompressionTypes, Kafka } = require('kafkajs')
 const express = require('express');
 const app = express();
 var http = require('http').createServer(app);
 const WebSocket = require('ws');
 const PORT = process.env.PORT || 3000;
-const brokers = process.env.BROKERS || '192.168.1.12:9092,192.168.1.12:19092,192.168.1.12:39092'
+const brokers = process.env.BROKERS || 'tepdiprtl001.seagate.com:9092,tepdiprtl002.seagate.com:9092,tepdiprtl003.seagate.com:9092'
 // const partitions = brokers.split(",").length
 
 app.use(express.static('public', { maxAge: 60 }))
@@ -25,10 +25,16 @@ async function initProducer() {
   await producer.connect()
 }
 async function produceMessage(data, ws, cacheMsg) {
-  // await producer.connect()
-  if (data.stopRepeat) {
-    ws.repeat = false;
-    return;
+  switch (data.trigger) {
+    case "stopRepeat":
+      ws.repeat = false;
+      return;
+    case "stopCompress":
+      ws.compress = false;
+      return;
+    case "compress":
+      ws.compress = true;
+      return;
   }
   
   var message = { value: data.message, partition: data.key%topics[data.topic] };
@@ -36,31 +42,19 @@ async function produceMessage(data, ws, cacheMsg) {
   if (!cacheMsg && data.multiply) {
     messages = new Array(data.multiply);
     for (let i=0; i<data.multiply; ++i) messages[i] = message;
-    // messages = Array(data.multiply).fill(message)
-    // messages = Array.from({length:data.multiply}).map(x => messages[0])
   }
   await producer.send({
     topic: data.topic,
+    compression: ws.compress ? CompressionTypes.GZIP : CompressionTypes.None,
     messages: messages
   })
   ws.msgSent += messages.length;
   ws.msgPerSec += messages.length;
 
-  if (!ws.repeat && data.repeatMsg) {
-    ws.repeat = true;
-    data.repeatMsg = false;
-  }
   if (ws.repeat) {
     data.key++;
     produceMessage(data, ws, messages);
   }
-  // var data = {
-  //   action: "send",
-  //   success: true
-  // }
-  // ws.send(JSON.stringify(data))
-  // console.log("Message sent")
-  // await producer.disconnect()
 }
 
 // const consumer = kafka.consumer({ groupId: 'test-group' })
@@ -224,6 +218,14 @@ wsServer.on('connection', (ws, req) => {
         resetMetrics(ws);
         break;
       default:
+        if (data.repeatMsg) {
+          ws.repeat = true;
+          data.repeatMsg = false;
+        }
+        if (data.compress) {
+          ws.compress = true;
+          data.compress = false;
+        }
         produceMessage(data, ws);
         break;
     }
