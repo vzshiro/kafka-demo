@@ -78,7 +78,8 @@
             <div class="wrapper">
                 <button class="btn btn-primary" onclick="addConsumer(true)">Add Consumer (From Start)</button>
                 <button class="btn btn-primary" onclick="addConsumer(false)">Add Consumer</button>
-                <button class="btn btn-primary" onclick="addCommonConsumer()">Add Common Consumer</button>
+                <button class="btn btn-primary" onclick="addCommonConsumer(true)">Add Common Consumer (From Start)</button>
+                <button class="btn btn-primary" onclick="addCommonConsumer(false)">Add Common Consumer</button>
                 <button class="btn btn-primary" onclick="getMetrics()">Get Metrics</button>
                 <button class="btn btn-danger" onclick="resetMetrics()">Reset Metrics</button>
                 <button class="btn btn-danger" onclick="recreateTopics()">Recreate Topics</button>
@@ -231,11 +232,11 @@
             }
             ws.send(JSON.stringify(data));
         }
-        function addCommonConsumer() {
+        function addCommonConsumer(fromStart) {
             if (socketReady()) {
                 var data = {
                     action: "consumer",
-                    fromStart: false,
+                    fromStart: fromStart,
                     groupId: "common-group"
                 }
                 ws.send(JSON.stringify(data));
